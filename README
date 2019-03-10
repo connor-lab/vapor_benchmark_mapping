@@ -1,0 +1,58 @@
+SUMMARY
+
+This folder is a package that contains scripts and files for running three experiments: mapping of H1N1 sequences from human, swine, and birds to California/07/2009 (H1N1); mapping of Perth/16/2009 to itself at varing levels of divergence; pairwise mapping of influenza A sequences with and without VAPOR pre-classification.
+
+REQUIREMENTS
+
+The following are required, and where applicable must be in your PATH:
+    Minimap2 2.12
+    BWA 0.7.17
+    Hisat2 v2.1.0
+    NGM 0.5.0
+    VAPOR 0.1
+    Python3.x
+    GNU Parallel 20160222
+
+Additionally, artificialFastqGenerator (afg) v1.0.0 must be placed in code/afg 
+
+Additionally, the following resources are required:
+
+res/: a set of used resources with the following files and their respective indices for BWA, NGM, and HiSAT2.
+    HA_A_allsp_nfu.fa
+    perth1609.fa
+    cali0709.fa
+    HA_AvH1N1_nf.fa
+    HA_HuH1N1_nf.fa
+    HA_SwH1N1_nf.fa
+
+This can be downloaded as the tar archive https://s3.climb.ac.uk/vapor-benchmark-data/benchmarking_mapping_res_20_12_18.tar.gz
+
+For plotting, pandas 0.23.4, matplotlib 2.2.3, NumPy 1.15.2, and seaborn 0.9.0 are required.
+
+USAGE
+
+For the Perth mutation and mapping experiment run:
+
+    parallel --jobs N < code/parallel_commands/perth.pcom.sh > logs/perth.pcom.log 2>&1
+    bash code/fetch_perth_results.sh > HA_Perth1609vsPerth1609_mutall.csv
+    python3 plotting/plot_boxes_mutation_perth.py HA_Perth1609vsPerth1609_mutall.csv
+
+For the zoonotic segment mapping experiment, run:
+
+    parallel --jobs N < code/parallel_commands/H1N1.pcom.sh > logs/H1N1.pcom.log 2>&1
+    cat results_H1N1/HA_HuH1N1vsCali0709*.csv  > HA_HuH1N1vsCali0709.csv 
+    cat results_H1N1/HA_AvH1N1vsCali0709*.csv  > HA_AvH1N1vsCali0709.csv 
+    cat results_H1N1/HA_SwH1N1vsCali0709*.csv  > HA_SwH1N1vsCali0709.csv 
+    python3 plotting/plot_zoo_hists.py HA_HuH1N1vsCali0709.csv HA_SwH1N1vsCali0709.csv HA_AvH1N1vsCali0709.csv
+
+For the HA mapping without vapor, run:
+
+    parallel --jobs N < code/parallel_commands/HA_basic.pcom.sh > logs/HA_basic.pcom.log 2>&1
+    cat results_HA_basic/HA_basic*.csv > HA_basic.csv
+    python3 plotting/plot_HA_basic_hexbins.py HA_basic.csv HA_hex_novapor.pdf
+
+For the HA mapping with vapor, run:
+
+    parallel --jobs N < code/parallel_commands/HA_basic_with_vapor.pcom.sh > logs/HA_basic_with_vapor.pcom.log 2>&1
+    cat results_HA_basic_vapor/HA_basic_with_vapor*.csv > HA_basic_with_vapor.csv
+    python3 plotting/plot_HA_basic_hexbins.py HA_basic_with_vapor.csv HA_hex_with_vapor.pdf
